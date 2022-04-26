@@ -1,5 +1,5 @@
 # import the necessary packages
-from fastapi import FastAPI, File, UploadFile
+from fastapi import FastAPI, Body, File, UploadFile
 from pydantic import BaseModel
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
@@ -32,12 +32,16 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
+'''
 origins = [
     "http://fast.localhost",
     "http://fast.localhost:8080",
     "http://localhost",
     "http://localhost:8080",
 ]
+'''
+
+origins = ["*"]
 
 app.add_middleware(
     CORSMiddleware,
@@ -45,6 +49,7 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"]
 )
 
 class ImageCrop(BaseModel):
@@ -61,19 +66,24 @@ async def homepage():
     return FileResponse('/static-files/index.html')
 
 @app.post("/cropper/")
-def crop(image: ImageCrop):
+def crop(image: str = Body(...)):
 
-    url = images.find_by_uuid(image.uuid).url
+    image= json.loads(image)
+    url = images.find_by_uuid(image.get('uuid')).url
 
-    if exists(f'/static-files/{image.uuid}_{image.x1}_{image.y1}_{image.x2}_{image.y2}.png'):
+    if exists(f'/static-files/{image.get("uuid")}_{image.get("x1")}_{image.get("y1")}_{image.get("x2")}_{image.get("y2")}.png'):
         pass  
     else:
         img = Image.open(requests.get(url, stream=True).raw)
         img_crop = img.crop((image.x1,image.y1,image.x2,image.y2))
-        img_crop.save(f'/static-files/{image.uuid}_{image.x1}_{image.y1}_{image.x2}_{image.y2}.png')
+        img_crop.save(f'/static-files/{image.get("uuid")}_{image.get("x1")}_{image.get("y1")}_{image.get("x2")}_{image.get("y2")}.png') 
 
-    data = {'url' : f'https://adamant.tator.io:8092/static/{image.uuid}_{image.x1}_{image.y1}_{image.x2}_{image.y2}.png'}
-    return JSONResponse(content=jsonable_encoder(data))
+    data = {'url' : f'/static-files/{image.get("uuid")}_{image.get("x1")}_{image.get("y1")}_{image.get("x2")}_{image.get("y2")}.png'}
+    headers = {"Access-Control-Allow-Origin": "*", 
+            "Access-Control-Allow-Credentials": "true",
+            "Access-Control-Allow-Methods": "GET,HEAD,OPTIONS,POST,PUT",
+            "Access-Control-Allow-Headers": "Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers"}
+    return JSONResponse(content=jsonable_encoder(data), headers=headers)
 
 # for debugging purposes, it's helpful to start the Flask testing
 # server (don't use this for production)
