@@ -10,12 +10,12 @@ services:
       - "--api.insecure=true"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
-      - "--entrypoints.web.address=:8082"
+      - "--entrypoints.web.address=:8092"
       - "--providers.file.directory=/configuration"
       - "--providers.file.watch=true"
     ports:
-      - "8082:8082"
-      - "8080:8080"
+      - "8092:8092"
+      - "8093:8080"
     networks:
       - backend
       - traefik-public

@@ -63,7 +63,7 @@ async def homepage():
 @app.post("/cropper/")
 def crop(image: ImageCrop):
 
-    url = images.find_by_uuid(image.uuid)
+    url = images.find_by_uuid(image.uuid).url
 
     if exists(f'/static-files/{image.uuid}_{image.x1}_{image.y1}_{image.x2}_{image.y2}.png'):
         pass  
@@ -72,7 +72,7 @@ def crop(image: ImageCrop):
         img_crop = img.crop((image.x1,image.y1,image.x2,image.y2))
         img_crop.save(f'/static-files/{image.uuid}_{image.x1}_{image.y1}_{image.x2}_{image.y2}.png')
 
-    data = {'url' : f'/static-files/{image.uuid}_{image.x1}_{image.y1}_{image.x2}_{image.y2}.png'}
+    data = {'url' : f'https://adamant.tator.io:8092/static/{image.uuid}_{image.x1}_{image.y1}_{image.x2}_{image.y2}.png'}
     return JSONResponse(content=jsonable_encoder(data))
 
 # for debugging purposes, it's helpful to start the Flask testing
