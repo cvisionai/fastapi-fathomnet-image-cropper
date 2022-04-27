@@ -1,5 +1,5 @@
 # import the necessary packages
-from fastapi import FastAPI, Body, File, UploadFile
+from fastapi import FastAPI, Request, Response, Body, File, UploadFile
 from pydantic import BaseModel
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
@@ -32,16 +32,7 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
-'''
-origins = [
-    "http://fast.localhost",
-    "http://fast.localhost:8080",
-    "http://localhost",
-    "http://localhost:8080",
-]
-'''
-
-origins = ["*"]
+origins = ['*']
 
 app.add_middleware(
     CORSMiddleware,
@@ -65,35 +56,22 @@ app.mount("/static", StaticFiles(directory="/static-files"), name="static")
 async def homepage():
     return FileResponse('/static-files/index.html')
 
-@app.options('/{rest_of_path:path}')
-async def preflight_handler(request: Request, rest_of_path: str) -> Response:
-    response = Response()
-    response.headers['Access-Control-Allow-Origin'] = origins
-    response.headers['Access-Control-Allow-Methods'] = 'POST, GET, OPTIONS'
-    response.headers['Access-Control-Allow-Headers'] = 'Authorization, Content-Type'
-    return response
-
 @app.post("/cropper/")
-def crop(image: str = Body(...)):
+def crop(image: ImageCrop):
 
-    image= json.loads(image)
-    url = images.find_by_uuid(image.get('uuid')).url
+    url = images.find_by_uuid(image.uuid).url
 
-    if exists(f'/static-files/{image.get("uuid")}_{image.get("x1")}_{image.get("y1")}_{image.get("x2")}_{image.get("y2")}.png'):
+    path_string = f'/static-files/{image.uuid}_{image.x1}_{image.y1}_{image.x2}_{image.y2}.png'
+    if exists(path_string):
         pass  
     else:
         img = Image.open(requests.get(url, stream=True).raw)
         img_crop = img.crop((image.x1,image.y1,image.x2,image.y2))
-        img_crop.save(f'/static-files/{image.get("uuid")}_{image.get("x1")}_{image.get("y1")}_{image.get("x2")}_{image.get("y2")}.png') 
+        img_crop.save(path_string) 
 
-    data = {'url' : f'/static-files/{image.get("uuid")}_{image.get("x1")}_{image.get("y1")}_{image.get("x2")}_{image.get("y2")}.png'}
-    '''
-    headers = {"Access-Control-Allow-Origin": "*", 
-            "Access-Control-Allow-Credentials": "true",
-            "Access-Control-Allow-Methods": "GET,HEAD,OPTIONS,POST,PUT",
-            "Access-Control-Allow-Headers": "Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers"}
-    '''
-    return JSONResponse(content=jsonable_encoder(data), headers=headers)
+    data = {'url' : path_string} 
+    
+    return JSONResponse(content=jsonable_encoder(data))
 
 # for debugging purposes, it's helpful to start the Flask testing
 # server (don't use this for production)
