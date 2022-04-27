@@ -65,6 +65,14 @@ app.mount("/static", StaticFiles(directory="/static-files"), name="static")
 async def homepage():
     return FileResponse('/static-files/index.html')
 
+@app.options('/{rest_of_path:path}')
+async def preflight_handler(request: Request, rest_of_path: str) -> Response:
+    response = Response()
+    response.headers['Access-Control-Allow-Origin'] = origins
+    response.headers['Access-Control-Allow-Methods'] = 'POST, GET, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = 'Authorization, Content-Type'
+    return response
+
 @app.post("/cropper/")
 def crop(image: str = Body(...)):
 
@@ -79,10 +87,12 @@ def crop(image: str = Body(...)):
         img_crop.save(f'/static-files/{image.get("uuid")}_{image.get("x1")}_{image.get("y1")}_{image.get("x2")}_{image.get("y2")}.png') 
 
     data = {'url' : f'/static-files/{image.get("uuid")}_{image.get("x1")}_{image.get("y1")}_{image.get("x2")}_{image.get("y2")}.png'}
+    '''
     headers = {"Access-Control-Allow-Origin": "*", 
             "Access-Control-Allow-Credentials": "true",
             "Access-Control-Allow-Methods": "GET,HEAD,OPTIONS,POST,PUT",
             "Access-Control-Allow-Headers": "Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers"}
+    '''
     return JSONResponse(content=jsonable_encoder(data), headers=headers)
 
 # for debugging purposes, it's helpful to start the Flask testing
