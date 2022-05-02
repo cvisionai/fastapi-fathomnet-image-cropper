@@ -61,7 +61,7 @@ def crop(image: ImageCrop):
 
     url = images.find_by_uuid(image.uuid).url
 
-    path_string = f'/static-files/{image.uuid}_{image.x1}_{image.y1}_{image.x2}_{image.y2}.png'
+    path_string = f'/static/{image.uuid}_{image.x1}_{image.y1}_{image.x2}_{image.y2}.png'
     if exists(path_string):
         pass  
     else:
