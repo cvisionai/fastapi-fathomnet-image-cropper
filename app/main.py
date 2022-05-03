@@ -69,7 +69,7 @@ def crop(image: ImageCrop):
         img_crop = img.crop((image.x1,image.y1,image.x2,image.y2))
         img_crop.save(path_string) 
 
-    deployment_url = 'https://adamant.tator.io:8092/'
+    deployment_url = 'https://adamant.tator.io:8092'
     data = {'url' : deployment_url + path_string} 
     
     return JSONResponse(content=jsonable_encoder(data))
