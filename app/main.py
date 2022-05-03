@@ -61,7 +61,8 @@ def crop(image: ImageCrop):
 
     url = images.find_by_uuid(image.uuid).url
     path_string = f'/static/{image.uuid}_{image.x1}_{image.y1}_{image.x2}_{image.y2}.png'
-    if exists(f'/static-files/{image.get("uuid")}_{image.get("x1")}_{image.get("y1")}_{image.get("x2")}_{image.get("y2")}.png'):
+    path_check_string = f'/static-files/{image.uuid}_{image.x1}_{image.y1}_{image.x2}_{image.y2}.png'
+    if exists(path_check_string):
         logger.info("Requested file exists, skipping crop operation")
     else:
         img = Image.open(requests.get(url, stream=True).raw)
