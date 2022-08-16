@@ -67,7 +67,7 @@ def crop(image: ImageCrop):
     else:
         img = Image.open(requests.get(url, stream=True).raw)
         img_crop = img.crop((image.x1,image.y1,image.x2,image.y2))
-        img_crop.save(path_string) 
+        img_crop.save(path_check_string) 
 
     deployment_url = 'https://adamant.tator.io:8092'
     data = {'url' : deployment_url + path_string} 

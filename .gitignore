@@ -1,2 +1,3 @@
 *.pyc
 app/_pycache__/
+static-files/*.png
