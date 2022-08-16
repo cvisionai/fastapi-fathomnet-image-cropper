@@ -48,7 +48,10 @@ class ImageCrop(BaseModel):
     x1 : int
     y1 : int
     x2 : int
-    y2 : int
+    y2: int
+    
+class ImageCropList(BaseModel):
+    uuidList: list
 
 app.mount("/static", StaticFiles(directory="/static-files"), name="static")
 
@@ -73,6 +76,25 @@ def crop(image: ImageCrop):
     data = {'url' : deployment_url + path_string} 
     
     return JSONResponse(content=jsonable_encoder(data))
+
+@app.post("/cropper-list/")
+def croplist(uuidList: ImageCropList):
+    dataList = {}
+    for image in uuidList:
+        url = images.find_by_uuid(image.uuid).url
+
+        path_string = f'/static/{image.uuid}_{image.x1}_{image.y1}_{image.x2}_{image.y2}.png'
+        if exists(path_string):
+            pass  
+        else:
+            img = Image.open(requests.get(url, stream=True).raw)
+            img_crop = img.crop((image.x1,image.y1,image.x2,image.y2))
+            img_crop.save(path_string) 
+
+        # data = {'url': path_string}
+        dataList[image.uuid] = path_string
+        
+    return JSONResponse(content=jsonable_encoder(dataList))
 
 # for debugging purposes, it's helpful to start the Flask testing
 # server (don't use this for production)
