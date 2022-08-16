@@ -82,17 +82,17 @@ def croplist(uuidList: ImageCropList):
     dataList = {}
     for image in uuidList:
         url = images.find_by_uuid(image.uuid).url
-
         path_string = f'/static/{image.uuid}_{image.x1}_{image.y1}_{image.x2}_{image.y2}.png'
-        if exists(path_string):
-            pass  
+        path_check_string = f'/static-files/{image.uuid}_{image.x1}_{image.y1}_{image.x2}_{image.y2}.png'
+        if exists(path_check_string):
+            logger.info("Requested file exists, skipping crop operation")
         else:
             img = Image.open(requests.get(url, stream=True).raw)
             img_crop = img.crop((image.x1,image.y1,image.x2,image.y2))
             img_crop.save(path_string) 
 
-        # data = {'url': path_string}
-        dataList[image.uuid] = path_string
+        deployment_url = 'https://adamant.tator.io:8092'
+        dataList[image.uuid] = deployment_url + path_string
         
     return JSONResponse(content=jsonable_encoder(dataList))
 
