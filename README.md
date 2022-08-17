@@ -1,4 +1,21 @@
 
+This project is a simple server that accepts POSTs with Fathomnet UUIDs and a crop region, generates those crops, and hosts the resulting images. A simple hash function that takes the image UUID, and adds the dimensions of the crops is used to determine if an image exists in the cache or not, to prevent extra downloads and crops. The server responds to a POST with the URL of the cropped image.
+
+Some important notes for getting started. You will need a .env with the appropriate values filled in, corresponding to your host domain, host url, and host port, as well as the location of your traefik configuration folder, which you will need to have if you wish to use HTTPS. Some helpful hints about that folder. You will want to have three files, certificates.toml, fullchain.pem, privkey.pem (you don't need to keep the fullchain or privkey naming convention, but you need them to be consistent in the certificates.toml file). The certificates.toml file will contain
+
+```
+[[tls.certificates]] #first certificate
+    certFile = "/configuration/files/fullchain.pem" # managed by Certbot
+    keyFile = "/configuration/files/privkey.pem" # managed by Certbot
+```
+
+The permissions for these files should be
+* certificates.toml - 664
+* fullchain.pem - 600
+* privkey.pem - 600
+
+Not setting these files up correctly will result in much heartburn in using TLS.
+
 Launch on localhost using docker-compose:
 ```bash
 cd fastapi-fathomnet-image-cropper
@@ -9,7 +26,8 @@ You can scale services to be able to handle more requests by using --scale fast=
 
 Browser Windows:
 - http://localhost:8080/dashboard
-- http://localhost:8092/static/index.html
+
+Currently there is no front end for the API, but a test one could be made if one were inclined to contribute.
 
 Test curl commands:
 ```bash
@@ -28,5 +46,4 @@ python3 simple_request.py
 
 TODO
 
-- Add aspect ratio preserving capability
 - Add health checks. Consider https://pypi.org/project/fastapi-health/

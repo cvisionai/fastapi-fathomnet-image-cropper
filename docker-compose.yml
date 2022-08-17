@@ -37,6 +37,9 @@ services:
     image: fast:latest
     build: ./app/
     #container_name: "fast"
+    environment:
+      SERVER_URL : "${SERVER_URL}"
+      SERVER_PORT : "${SERVER_PORT}"
     networks:
       - backend
       - traefik-public

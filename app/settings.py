@@ -1,1 +1,0 @@
-DEPLOYMENT_URL = 'https://adamant.tator.io:8092'
