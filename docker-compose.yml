@@ -6,11 +6,10 @@ services:
     image: "traefik:v2.2"
     container_name: "traefik"
     command:
-      #- "--log.level=DEBUG"
       - "--api.insecure=true"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
-      - "--entrypoints.web.address=:8092"
+      - "--entrypoints.web.address=:${SERVER_PORT}"
       - "--providers.file.directory=/configuration"
       - "--providers.file.watch=true"
     ports:
@@ -21,7 +20,7 @@ services:
       - traefik-public
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
-      - "/home/ben/traefik/configuration/:/configuration/"
+      - "${TRAEFIK_CONFIG}:/configuration/"
 
   whoami:
     image: "containous/whoami"
@@ -43,12 +42,11 @@ services:
       - traefik-public
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.fast.rule=Host(`adamant.tator.io`)"
+      - "traefik.http.routers.fast.rule=Host(`${SERVER_HOST}`)"
       - "traefik.http.routers.fast.entrypoints=web"
       - "traefik.http.routers.fast.tls=true"
     volumes:
       - ./app:/app/app
-      - ./images:/images
       - ./script:/script
       - ./static-files:/static-files
     entrypoint: /start-reload.sh

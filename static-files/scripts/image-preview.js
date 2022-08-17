@@ -1,6 +1,0 @@
-class ImagePreview {
-   constructor() {
-      //       
-   }
-
-}

@@ -9,17 +9,15 @@ from starlette.responses import FileResponse
 from PIL import Image
 from pydantic import BaseModel
 from fathomnet.api import images
+import app.settings as settings
 from os.path import exists
 import requests
-import numpy as np
-import app.settings as settings
-import app.helpers as helpers
-import redis
-import uuid
 import time
-import json
-import io
+import time
 import logging
+import os
+import wget
+from urllib.parse import unquote
 
 logging.basicConfig(
     handlers=[logging.StreamHandler()],
@@ -68,11 +66,18 @@ def crop(image: ImageCrop):
     if exists(path_check_string):
         logger.info("Requested file exists, skipping crop operation")
     else:
-        img = Image.open(requests.get(url, stream=True).raw)
+        start_time = time.time()
+        img_name = wget.download(unquote(url))
+        fetch_time = time.time() - start_time
+        img = Image.open(img_name)
+        open_time = time.time() - start_time
         img_crop = img.crop((image.x1,image.y1,image.x2,image.y2))
         img_crop.save(path_check_string) 
+        finish_time = time.time() - start_time
+        logger.info(f"Image fetch time: {fetch_time}, Image open time: {open_time}, Total process time: {finish_time}")
+        os.remove(img_name)
 
-    deployment_url = 'https://adamant.tator.io:8092'
+    deployment_url = settings.DEPLOYMENT_URL
     data = {'url' : deployment_url + path_string} 
     
     return JSONResponse(content=jsonable_encoder(data))
@@ -87,16 +92,22 @@ def croplist(uuidList: ImageCropList):
         if exists(path_check_string):
             logger.info("Requested file exists, skipping crop operation")
         else:
-            img = Image.open(requests.get(url, stream=True).raw)
+            start_time = time.time()
+            raw_image = requests.get(url, stream=True).raw
+            fetch_time = time.time() - start_time
+            img = Image.open(raw_image)
+            open_time = time.time() - start_time
             img_crop = img.crop((image.x1,image.y1,image.x2,image.y2))
-            img_crop.save(path_string) 
-
+            img_crop.save(path_string)
+            finish_time = time.time() - start_time
+            logger.info(f"Image fetch time: {fetch_time}, Image open time: {open_time}, Total process time: {finish_time}")
+            
         deployment_url = 'https://adamant.tator.io:8092'
         dataList[image.uuid] = deployment_url + path_string
         
     return JSONResponse(content=jsonable_encoder(dataList))
 
-# for debugging purposes, it's helpful to start the Flask testing
+# for debugging purposes, it's helpful to start the testing
 # server (don't use this for production)
 if __name__ == "__main__":
     print("* Starting web service...")

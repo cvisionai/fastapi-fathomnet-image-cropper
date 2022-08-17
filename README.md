@@ -1,22 +1,22 @@
 
 Launch on localhost using docker-compose:
 ```bash
-cd keras-model-server-fast-api
+cd fastapi-fathomnet-image-cropper
 docker network create traefik-public
 docker-compose up --build
 ```
-You can scale services to be able to handle more requests by using --scale modelserv=N --scale fast=M. Experimentally you want more web servers (fast) than model servers because the model takes a little while to process
+You can scale services to be able to handle more requests by using --scale fast=M. Experimentally you want a few web servers to handle multiple concurrent requests or larger requests. 
 
 Browser Windows:
 - http://localhost:8080/dashboard
-- http://localhost:8082/static/index.html
+- http://localhost:8092/static/index.html
 
 Test curl commands:
 ```bash
 curl -k http://localhost:8082/
 
 cd images
-time curl -X POST 'http://localhost:8082/predictor/' -H "accept: application/json" -H "Content-Type: multipart/form-data" -F "file=@00_01_13_13.png;type=image/png"
+time curl -X POST 'https://your_domain.com:port_number/cropper/' -H 'Content-Type: application/json' -d '{"uuid": "f11816b8-8adb-41b3-8a2b-0ef976d8af29","x1": "100", "y1": "100", "x2": "405", "y2": "400"}
 ```
 
 Test simple-request.py
@@ -26,18 +26,7 @@ cd /script/
 python3 simple_request.py
 ```
 
-Stress test will probably want to run outside of a container, because it will only submit to the server you're running it from. In this case, make sure the port is right.
-```
-python3 stress_test.py
-```
-
 TODO
 
-- Add box overlay capability
-- Add score thresholding
-- Configure CPU/GPU
-- Configure modelserver type
-- Configure TLS
-- Configure URLs
-- Configure ports
+- Add aspect ratio preserving capability
 - Add health checks. Consider https://pypi.org/project/fastapi-health/
