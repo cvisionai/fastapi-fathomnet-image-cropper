@@ -15,6 +15,7 @@ import logging
 import os
 import wget
 from urllib.parse import unquote
+from fastapi import FastAPI, Request
 
 logging.basicConfig(
     handlers=[logging.StreamHandler()],
@@ -37,6 +38,13 @@ app.add_middleware(
     allow_headers=["*"],
     expose_headers=["*"]
 )
+
+@app.middleware("http")
+async def add_cache_header(request: Request, call_next):
+    response = await call_next(request)
+    # This is a one year cache on the response
+    response.headers["X-Cache-Control"] = "max-age=31536000"
+    return response
 
 class ImageCrop(BaseModel):
     uuid: str
