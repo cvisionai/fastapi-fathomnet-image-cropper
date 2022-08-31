@@ -44,7 +44,7 @@ app.add_middleware(
 async def add_cache_header(request: Request, call_next):
     response = await call_next(request)
     # This is a one year cache on the response
-    response.headers["X-Cache-Control"] = "max-age=31536000"
+    response.headers["Cache-Control"] = "max-age=31536000"
     return response
 
 class ImageCrop(BaseModel):
