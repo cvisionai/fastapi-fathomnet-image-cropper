@@ -2,3 +2,4 @@
 app/_pycache__/
 static-files/*.png
 static-files/*.jpeg
+static-files/*.webp

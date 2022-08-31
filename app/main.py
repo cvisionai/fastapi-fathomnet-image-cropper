@@ -1,5 +1,5 @@
 # import the necessary packages
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from pydantic import BaseModel
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
@@ -16,7 +16,6 @@ import logging
 import os
 import wget
 from urllib.parse import unquote
-from fastapi import FastAPI, Request
 
 logging.basicConfig(
     handlers=[logging.StreamHandler()],
@@ -67,8 +66,8 @@ async def homepage():
 def crop(image: ImageCrop):
 
     url = images.find_by_uuid(image.uuid).url
-    path_string = f'/static/{image.uuid}_{image.x1}_{image.y1}_{image.x2}_{image.y2}.jpeg'
-    path_check_string = f'/static-files/{image.uuid}_{image.x1}_{image.y1}_{image.x2}_{image.y2}.jpeg'
+    path_string = f'/static/{image.uuid}_{image.x1}_{image.y1}_{image.x2}_{image.y2}.webp'
+    path_check_string = f'/static-files/{image.uuid}_{image.x1}_{image.y1}_{image.x2}_{image.y2}.webp'
     if exists(path_check_string):
         logger.info("Requested file exists, skipping crop operation")
     else:
@@ -80,7 +79,8 @@ def crop(image: ImageCrop):
             img = img.convert('RGB')
         open_time = time.time() - start_time
         img_crop = img.crop((image.x1,image.y1,image.x2,image.y2))
-        img_crop.save(path_check_string, quality='web_high') 
+        #img_crop.save(path_check_string, quality='web_high')
+        img_crop.save(path_check_string,"WEBP")
         finish_time = time.time() - start_time
         logger.info(f"Image fetch time: {fetch_time}, Image open time: {open_time}, Total process time: {finish_time}")
         os.remove(img_name)
@@ -95,8 +95,8 @@ def croplist(uuidList: List[ImageCrop]):
     dataList = {}
     for image in uuidList:
         url = images.find_by_uuid(image.uuid).url
-        path_string = f'/static/{image.uuid}_{image.x1}_{image.y1}_{image.x2}_{image.y2}.jpeg'
-        path_check_string = f'/static-files/{image.uuid}_{image.x1}_{image.y1}_{image.x2}_{image.y2}.jpeg'
+        path_string = f'/static/{image.uuid}_{image.x1}_{image.y1}_{image.x2}_{image.y2}.webp'
+        path_check_string = f'/static-files/{image.uuid}_{image.x1}_{image.y1}_{image.x2}_{image.y2}.webp'
         if exists(path_check_string):
             logger.info("Requested file exists, skipping crop operation")
         else:
@@ -108,7 +108,8 @@ def croplist(uuidList: List[ImageCrop]):
                 img = img.convert('RGB')
             open_time = time.time() - start_time
             img_crop = img.crop((image.x1,image.y1,image.x2,image.y2))
-            img_crop.save(path_check_string, quality='web_high') 
+            #img_crop.save(path_check_string, quality='web_high')
+            img_crop.save(path_check_string, "WEBP") 
             finish_time = time.time() - start_time
             logger.info(f"Image fetch time: {fetch_time}, Image open time: {open_time}, Total process time: {finish_time}")
             
