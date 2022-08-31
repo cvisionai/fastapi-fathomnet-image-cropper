@@ -1,7 +1,9 @@
 
 This project is a simple server that accepts POSTs with Fathomnet UUIDs and a crop region, generates those crops, and hosts the resulting images. A simple hash function that takes the image UUID, and adds the dimensions of the crops is used to determine if an image exists in the cache or not, to prevent extra downloads and crops. The server responds to a POST with the URL of the cropped image.
 
-Some important notes for getting started. You will need a .env with the appropriate values filled in, corresponding to your host domain, host url, and host port, as well as the location of your traefik configuration folder, which you will need to have if you wish to use HTTPS. Some helpful hints about that folder. You will want to have three files, certificates.toml, fullchain.pem, privkey.pem (you don't need to keep the fullchain or privkey naming convention, but you need them to be consistent in the certificates.toml file). The certificates.toml file will contain
+## Getting started
+
+You will need a .env with the appropriate values filled in, corresponding to your host domain, host url, and host port, as well as the location of your traefik configuration folder, which you will need to have if you wish to use HTTPS. Some helpful hints about that folder. You will want to have three files, certificates.toml, fullchain.pem, privkey.pem (you don't need to keep the fullchain or privkey naming convention, but you need them to be consistent in the certificates.toml file). The certificates.toml file will contain
 
 ```
 [[tls.certificates]] #first certificate
@@ -15,6 +17,9 @@ The permissions for these files should be
 * privkey.pem - 600
 
 Not setting these files up correctly will result in much heartburn in using TLS.
+
+
+## Spinning up using docker-compose
 
 Launch on localhost using docker-compose:
 ```bash
