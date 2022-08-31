@@ -29,11 +29,8 @@ Browser Windows:
 
 Currently there is no front end for the API, but a test one could be made if one were inclined to contribute.
 
-Test curl commands:
+Test curl command:
 ```bash
-curl -k http://localhost:8082/
-
-cd images
 time curl -X POST 'https://your_domain.com:port_number/cropper/' -H 'Content-Type: application/json' -d '{"uuid": "f11816b8-8adb-41b3-8a2b-0ef976d8af29","x1": "100", "y1": "100", "x2": "405", "y2": "400"}
 ```
 

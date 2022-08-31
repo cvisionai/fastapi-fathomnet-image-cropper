@@ -10,6 +10,7 @@ from PIL import Image
 from pydantic import BaseModel
 from fathomnet.api import images
 from os.path import exists
+from typing import List
 import time
 import logging
 import os
@@ -58,8 +59,8 @@ async def homepage():
 def crop(image: ImageCrop):
 
     url = images.find_by_uuid(image.uuid).url
-    path_string = f'/static/{image.uuid}_{image.x1}_{image.y1}_{image.x2}_{image.y2}.png'
-    path_check_string = f'/static-files/{image.uuid}_{image.x1}_{image.y1}_{image.x2}_{image.y2}.png'
+    path_string = f'/static/{image.uuid}_{image.x1}_{image.y1}_{image.x2}_{image.y2}.jpeg'
+    path_check_string = f'/static-files/{image.uuid}_{image.x1}_{image.y1}_{image.x2}_{image.y2}.jpeg'
     if exists(path_check_string):
         logger.info("Requested file exists, skipping crop operation")
     else:
@@ -67,9 +68,11 @@ def crop(image: ImageCrop):
         img_name = wget.download(unquote(url))
         fetch_time = time.time() - start_time
         img = Image.open(img_name)
+        if img.mode != 'RGB':
+            img = img.convert('RGB')
         open_time = time.time() - start_time
         img_crop = img.crop((image.x1,image.y1,image.x2,image.y2))
-        img_crop.save(path_check_string) 
+        img_crop.save(path_check_string, quality='web_high') 
         finish_time = time.time() - start_time
         logger.info(f"Image fetch time: {fetch_time}, Image open time: {open_time}, Total process time: {finish_time}")
         os.remove(img_name)
@@ -80,12 +83,12 @@ def crop(image: ImageCrop):
     return JSONResponse(content=jsonable_encoder(data))
 
 @app.post("/cropper-list/")
-def croplist(uuidList: ImageCropList):
+def croplist(uuidList: List[ImageCrop]):
     dataList = {}
     for image in uuidList:
         url = images.find_by_uuid(image.uuid).url
-        path_string = f'/static/{image.uuid}_{image.x1}_{image.y1}_{image.x2}_{image.y2}.png'
-        path_check_string = f'/static-files/{image.uuid}_{image.x1}_{image.y1}_{image.x2}_{image.y2}.png'
+        path_string = f'/static/{image.uuid}_{image.x1}_{image.y1}_{image.x2}_{image.y2}.jpeg'
+        path_check_string = f'/static-files/{image.uuid}_{image.x1}_{image.y1}_{image.x2}_{image.y2}.jpeg'
         if exists(path_check_string):
             logger.info("Requested file exists, skipping crop operation")
         else:
@@ -93,9 +96,11 @@ def croplist(uuidList: ImageCropList):
             img_name = wget.download(unquote(url))
             fetch_time = time.time() - start_time
             img = Image.open(img_name)
+            if img.mode != 'RGB':
+                img = img.convert('RGB')
             open_time = time.time() - start_time
             img_crop = img.crop((image.x1,image.y1,image.x2,image.y2))
-            img_crop.save(path_string)
+            img_crop.save(path_check_string, quality='web_high') 
             finish_time = time.time() - start_time
             logger.info(f"Image fetch time: {fetch_time}, Image open time: {open_time}, Total process time: {finish_time}")
             
